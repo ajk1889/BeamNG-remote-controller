@@ -2,15 +2,18 @@ package com.ajk.controller
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.View
+import android.view.WindowManager
+import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.net.URI
 import kotlin.math.abs
@@ -18,16 +21,58 @@ import kotlin.math.asin
 import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
-    var rx = Short.MIN_VALUE
-    var ry = Short.MIN_VALUE
-    var lx = Short.MIN_VALUE
-    var ly = Short.MIN_VALUE
+    private var rx = Short.MIN_VALUE
+    private var ry = Short.MIN_VALUE
+    private var lx = Short.MIN_VALUE
+    private var ly = Short.MIN_VALUE
+
+    private var connection: Connection? = null
+    private lateinit var preferences: SharedPreferences
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val conn = Connection(URI("ws://192.168.18.63:31415"))
+        preferences = getPreferences(MODE_PRIVATE)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (connection == null) showConnectionDialog()
+        else connect(connection!!.uri.toString())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        connection?.close()
+    }
+
+    private fun showConnectionDialog() {
+        val view = layoutInflater.inflate(R.layout.connection_properties, null)
+        view.findViewById<EditText>(R.id.ipAddress)
+            .setText(preferences.getString("ipAddress", "192.168.18."))
+        view.findViewById<EditText>(R.id.port)
+            .setText(preferences.getString("port", "31415"))
+        AlertDialog.Builder(this)
+            .setView(view)
+            .setPositiveButton("OK") { _, _ ->
+                val ipAddress = view.findViewById<EditText>(R.id.ipAddress).text.toString()
+                val port = view.findViewById<EditText>(R.id.port).text.toString()
+                preferences.edit()
+                    .putString("ipAddress", ipAddress)
+                    .putString("port", port)
+                    .apply()
+                connect("ws://$ipAddress:$port")
+            }
+            .setNegativeButton("Exit") { _, _ -> finish() }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun connect(url: String) {
+        val conn = Connection(URI(url))
+        connection = conn
         conn.connect()
 
         fun sendRequestConditionally(previousTime: Long, events: List<Event>): Long {
@@ -42,14 +87,19 @@ class MainActivity : AppCompatActivity() {
         findViewById<SeekBar>(R.id.accelerator).apply {
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 var lastEventSentTimestamp = 0L
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    val value = (progress - 50)/50.0 * Short.MAX_VALUE
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    val value = (progress - 50) / 50.0 * Short.MAX_VALUE
                     ly = value.toInt().toShort()
                     lastEventSentTimestamp = sendRequestConditionally(
                         lastEventSentTimestamp,
                         listOf(Event(ANALOG_LY, ly), Event(ANALOG_LX, lx))
                     )
                 }
+
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
@@ -58,14 +108,19 @@ class MainActivity : AppCompatActivity() {
         findViewById<SeekBar>(R.id.brake).apply {
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 var lastEventSentTimestamp = 0L
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    val value = (progress - 50)/50.0 * Short.MAX_VALUE
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    val value = (progress - 50) / 50.0 * Short.MAX_VALUE
                     ry = value.toInt().toShort()
                     lastEventSentTimestamp = sendRequestConditionally(
                         lastEventSentTimestamp,
                         listOf(Event(ANALOG_RY, ry), Event(ANALOG_RX, rx))
                     )
                 }
+
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
@@ -74,14 +129,19 @@ class MainActivity : AppCompatActivity() {
         findViewById<SeekBar>(R.id.clutch).apply {
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 var lastEventSentTimestamp = 0L
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    val value = (progress - 50)/50.0 * Short.MAX_VALUE
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    val value = (progress - 50) / 50.0 * Short.MAX_VALUE
                     rx = value.toInt().toShort()
                     lastEventSentTimestamp = sendRequestConditionally(
                         lastEventSentTimestamp,
                         listOf(Event(ANALOG_RY, ry), Event(ANALOG_RX, rx))
                     )
                 }
+
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
@@ -112,7 +172,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-        }, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), 20*1000)
+        }, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), 20 * 1000)
 
         findViewById<TextView>(R.id.gearUp).setOnTouchListener { _, event ->
             when (event.action) {
@@ -147,5 +207,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun sqrtAvg(n0: Float,n1: Float,n2: Float) = sqrt(n0 * n0 + n1 * n1 + n2 * n2)
+    fun sqrtAvg(n0: Float, n1: Float, n2: Float) = sqrt(n0 * n0 + n1 * n1 + n2 * n2)
 }
