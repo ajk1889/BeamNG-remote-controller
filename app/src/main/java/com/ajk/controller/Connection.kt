@@ -33,7 +33,7 @@ class Connection (uri: URI) : WebSocketClient(uri) {
         if (readyState == ReadyState.OPEN) {
             val data = ShortArray(events.size * 2)
             events.forEachIndexed { index, event ->
-                data[2*index] = event.eventCode
+                data[2*index] = event.eventCode ?: return
                 data[2*index + 1] = event.value
             }
             val byteBuffer = ByteBuffer.allocate(data.size * Short.SIZE_BYTES)

@@ -10,7 +10,6 @@
     <androidx.appcompat.widget.AppCompatSeekBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:progress="30"
         android:padding="40dp"
         android:id="@+id/accelerator"
         android:background="#955"/>
@@ -37,16 +36,30 @@
             android:layout_weight="1"
             android:background="#353"/>
     </LinearLayout>
-    <View
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/handBrake"
-        android:background="@color/cardview_dark_background"
-        android:layout_weight="1"/>
+        android:layout_weight="1">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:id="@+id/engineStart"
+            android:background="#633"
+            android:gravity="center"
+            android:text="Start"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/handBrake"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:text="Handbrake"
+            android:background="@color/cardview_dark_background" />
+    </LinearLayout>
     <androidx.appcompat.widget.AppCompatSeekBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:progress="30"
         android:id="@+id/brake"
         android:padding="40dp"
         android:background="#595"/>
@@ -54,7 +67,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/clutch"
-        android:progress="30"
         android:padding="40dp"
         android:background="#559"/>
 </LinearLayout>
