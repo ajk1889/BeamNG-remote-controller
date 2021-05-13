@@ -70,6 +70,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun connect(url: String) {
         val conn = Connection(URI(url))
         connection = conn
