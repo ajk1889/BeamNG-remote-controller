@@ -28,7 +28,7 @@ class Connection (uri: URI) : WebSocketClient(uri) {
 
     private val eventsQueue = mutableListOf<Event>()
     fun sendMessage(event: Event) = sendMessage(listOf(event))
-    private fun sendMessage(events: List<Event>) {
+    fun sendMessage(events: List<Event>) {
         if (events.isEmpty()) return
         if (readyState == ReadyState.OPEN) {
             val data = ShortArray(events.size * 2)

@@ -1,20 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:padding="10dp"
-        android:id="@+id/upBtn"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:progress="30"
+        android:padding="40dp"
+        android:id="@+id/accelerator"
+        android:background="#955"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="90dp"
+            android:text="Down"
+            android:id="@+id/gearDown"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:layout_weight="1"
+            android:background="#335"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="90dp"
+            android:text="Up"
+            android:id="@+id/gearUp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:layout_weight="1"
+            android:background="#353"/>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/handBrake"
+        android:background="@color/cardview_dark_background"
+        android:layout_weight="1"/>
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="30"
+        android:id="@+id/brake"
+        android:padding="40dp"
+        android:background="#595"/>
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/clutch"
+        android:progress="30"
+        android:padding="40dp"
+        android:background="#559"/>
+</LinearLayout>
