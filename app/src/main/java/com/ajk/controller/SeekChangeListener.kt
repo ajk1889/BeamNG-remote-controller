@@ -49,8 +49,8 @@ class SeekChangeListener(
             try {
                 var remainingTime = RELEASE_DURATION - (now() - releasedTime)
                 while (remainingTime > 0) {
-                    delay(MIN_TIME_BTW_INPUTS.toLong())
                     seekBar.progress = (progressWhileReleasing * (remainingTime.toDouble() / RELEASE_DURATION)).toInt()
+                    delay(MIN_TIME_BTW_INPUTS.toLong())
                     remainingTime = RELEASE_DURATION - (now() - releasedTime)
                 }
                 seekBar.progress = 0
