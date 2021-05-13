@@ -15,16 +15,15 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.*
 import java.net.URI
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
-    private var rx = Short.MIN_VALUE
-    private var ry = Short.MIN_VALUE
-    private var lx = Short.MIN_VALUE
-    private var ly = Short.MIN_VALUE
+    private val left = AnalogValues(Short.MIN_VALUE, Short.MIN_VALUE)
+    private val right = AnalogValues(Short.MIN_VALUE, Short.MIN_VALUE)
 
     private var connection: Connection? = null
     private lateinit var preferences: SharedPreferences
@@ -77,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         conn.connect()
 
         fun sendRequestConditionally(previousTime: Long, events: List<Event>): Long {
-            val now = System.currentTimeMillis()
+            val now = now()
             if (now - previousTime > MIN_TIME_BTW_INPUTS) {
                 conn.sendMessage(events)
                 return now
@@ -86,66 +85,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<SeekBar>(R.id.accelerator).apply {
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                var lastEventSentTimestamp = 0L
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    val value = (progress - 50) / 50.0 * Short.MAX_VALUE
-                    ly = value.toInt().toShort()
-                    lastEventSentTimestamp = sendRequestConditionally(
-                        lastEventSentTimestamp,
-                        listOf(Event(ANALOG_LY, ly), Event(ANALOG_LX, lx))
-                    )
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
+            setOnSeekBarChangeListener(SeekChangeListener(conn, this@MainActivity.left, 'y', 'l'))
         }
 
         findViewById<SeekBar>(R.id.brake).apply {
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                var lastEventSentTimestamp = 0L
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    val value = (progress - 50) / 50.0 * Short.MAX_VALUE
-                    ry = value.toInt().toShort()
-                    lastEventSentTimestamp = sendRequestConditionally(
-                        lastEventSentTimestamp,
-                        listOf(Event(ANALOG_RY, ry), Event(ANALOG_RX, rx))
-                    )
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
+            setOnSeekBarChangeListener(SeekChangeListener(conn, this@MainActivity.right, 'y', 'r'))
         }
 
         findViewById<SeekBar>(R.id.clutch).apply {
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                var lastEventSentTimestamp = 0L
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    val value = (progress - 50) / 50.0 * Short.MAX_VALUE
-                    rx = value.toInt().toShort()
-                    lastEventSentTimestamp = sendRequestConditionally(
-                        lastEventSentTimestamp,
-                        listOf(Event(ANALOG_RY, ry), Event(ANALOG_RX, rx))
-                    )
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
+            setOnSeekBarChangeListener(SeekChangeListener(conn, this@MainActivity.right, 'x', 'r'))
         }
 
         val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -161,14 +109,14 @@ class MainActivity : AppCompatActivity() {
                 previousAngle = angle
 
                 val scaledAngle = USHORT_MAX_VALUE * angle
-                lx = when {
+                left.x = when {
                     scaledAngle > Short.MAX_VALUE -> Short.MAX_VALUE
                     scaledAngle < Short.MIN_VALUE -> Short.MIN_VALUE
                     else -> scaledAngle.toInt().toShort()
                 }
                 lastEventSentTimestamp = sendRequestConditionally(
                     lastEventSentTimestamp,
-                    listOf(Event(ANALOG_LY, ly), Event(ANALOG_LX, lx))
+                    listOf(Event(ANALOG_LY, left.y), Event(ANALOG_LX, left.x))
                 )
             }
 
@@ -208,5 +156,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun sqrtAvg(n0: Float, n1: Float, n2: Float) = sqrt(n0 * n0 + n1 * n1 + n2 * n2)
+    private fun sqrtAvg(n0: Float, n1: Float, n2: Float) = sqrt(n0 * n0 + n1 * n1 + n2 * n2)
+
+    private fun now() = System.currentTimeMillis()
 }

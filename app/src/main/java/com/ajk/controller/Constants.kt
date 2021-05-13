@@ -23,3 +23,6 @@ val eventCodeMap = mutableMapOf<String, Short>()
 
 const val MIN_TIME_BTW_INPUTS = 20
 const val USHORT_MAX_VALUE = 256 * 256
+const val RELEASE_DURATION = 200
+
+data class AnalogValues(var x: Short, var y: Short)
