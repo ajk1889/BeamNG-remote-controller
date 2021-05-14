@@ -8,6 +8,7 @@ class SeekChangeListener(
     private val analogValues: AnalogValues,
     private val direction: Char,
     private var position: Char,
+    private val autoRelease: Boolean
 ) : SeekBar.OnSeekBarChangeListener {
     private var lastEventSentTimestamp = 0L
     private var releasedTime = 0L
@@ -42,16 +43,19 @@ class SeekChangeListener(
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
         slowlyReleasingJob?.cancel()
     }
+
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        if (!autoRelease) return
         progressWhileReleasing = seekBar!!.progress
         releasedTime = now()
+        val actualReleaseDuration = MAX_RELEASE_DURATION * progressWhileReleasing / 100.0
         slowlyReleasingJob = ioScope.launch {
             try {
-                var remainingTime = RELEASE_DURATION - (now() - releasedTime)
+                var remainingTime = actualReleaseDuration - (now() - releasedTime)
                 while (remainingTime > 0) {
-                    seekBar.progress = (progressWhileReleasing * (remainingTime.toDouble() / RELEASE_DURATION)).toInt()
+                    seekBar.progress = (progressWhileReleasing * remainingTime / actualReleaseDuration).toInt()
                     delay(MIN_TIME_BTW_INPUTS.toLong())
-                    remainingTime = RELEASE_DURATION - (now() - releasedTime)
+                    remainingTime = actualReleaseDuration - (now() - releasedTime)
                 }
                 seekBar.progress = 0
             } catch (exception: CancellationException){

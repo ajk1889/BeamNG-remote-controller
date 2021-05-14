@@ -10,6 +10,7 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.WindowManager
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
@@ -47,22 +48,41 @@ class MainActivity : AppCompatActivity() {
         connection?.close()
     }
 
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+        if (event == null) return super.dispatchKeyEvent(event)
+        if (event.keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            if (event.action == KeyEvent.ACTION_DOWN)
+                findViewById<SeekBar>(R.id.brake).progress = 100
+            else if (event.action == KeyEvent.ACTION_UP)
+                findViewById<SeekBar>(R.id.brake).progress = 0
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     private fun showConnectionDialog() {
         val view = layoutInflater.inflate(R.layout.connection_properties, null)
-        view.findViewById<EditText>(R.id.ipAddress)
-            .setText(preferences.getString("ipAddress", "192.168.18."))
-        view.findViewById<EditText>(R.id.port)
-            .setText(preferences.getString("port", "31415"))
+        val ipAddressView = view.findViewById<EditText>(R.id.ipAddress)
+        val portView = view.findViewById<EditText>(R.id.port)
+        val slowlyReleaseAcceleratorView = view.findViewById<CheckBox>(R.id.slowlyReleaseAccelerator)
+        val slowlyReleaseBrakeView = view.findViewById<CheckBox>(R.id.slowlyReleaseBrake)
+        val slowlyReleaseClutchView = view.findViewById<CheckBox>(R.id.slowlyReleaseClutch)
+        ipAddressView.setText(preferences.getString("ipAddress", "192.168.18."))
+        portView.setText(preferences.getString("port", "31415"))
+        slowlyReleaseClutchView.isChecked = preferences.getBoolean("slowlyReleaseClutch", true)
+        slowlyReleaseBrakeView.isChecked = preferences.getBoolean("slowlyReleaseBrake", false)
+        slowlyReleaseAcceleratorView.isChecked = preferences.getBoolean("slowlyReleaseAccelerator", false)
         AlertDialog.Builder(this)
             .setView(view)
             .setPositiveButton("OK") { _, _ ->
-                val ipAddress = view.findViewById<EditText>(R.id.ipAddress).text.toString()
-                val port = view.findViewById<EditText>(R.id.port).text.toString()
                 preferences.edit()
-                    .putString("ipAddress", ipAddress)
-                    .putString("port", port)
+                    .putString("ipAddress", ipAddressView.text.toString())
+                    .putString("port", portView.text.toString())
+                    .putBoolean("slowlyReleaseAccelerator", slowlyReleaseAcceleratorView.isChecked)
+                    .putBoolean("slowlyReleaseBrake", slowlyReleaseBrakeView.isChecked)
+                    .putBoolean("slowlyReleaseClutch", slowlyReleaseClutchView.isChecked)
                     .apply()
-                connect("ws://$ipAddress:$port")
+                connect("ws://${ipAddressView.text}:${portView.text}")
             }
             .setNegativeButton("Exit") { _, _ -> finish() }
             .setCancelable(false)
@@ -85,15 +105,39 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<SeekBar>(R.id.accelerator).apply {
-            setOnSeekBarChangeListener(SeekChangeListener(conn, this@MainActivity.left, 'y', 'l'))
+            setOnSeekBarChangeListener(
+                SeekChangeListener(
+                    connection = conn,
+                    analogValues = this@MainActivity.left,
+                    direction = 'y',
+                    position = 'l',
+                    autoRelease = preferences.getBoolean("slowlyReleaseAccelerator", false)
+                )
+            )
         }
 
         findViewById<SeekBar>(R.id.brake).apply {
-            setOnSeekBarChangeListener(SeekChangeListener(conn, this@MainActivity.right, 'y', 'r'))
+            setOnSeekBarChangeListener(
+                SeekChangeListener(
+                    connection = conn,
+                    analogValues = this@MainActivity.right,
+                    direction = 'y',
+                    position = 'r',
+                    autoRelease = preferences.getBoolean("slowlyReleaseBrake", false)
+                )
+            )
         }
 
         findViewById<SeekBar>(R.id.clutch).apply {
-            setOnSeekBarChangeListener(SeekChangeListener(conn, this@MainActivity.right, 'x', 'r'))
+            setOnSeekBarChangeListener(
+                SeekChangeListener(
+                    connection = conn,
+                    analogValues = this@MainActivity.right,
+                    direction = 'x',
+                    position = 'r',
+                    autoRelease = preferences.getBoolean("slowlyReleaseClutch", true)
+                )
+            )
         }
 
         val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
