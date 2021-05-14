@@ -28,11 +28,13 @@ class MainActivity : AppCompatActivity() {
 
     private var connection: Connection? = null
     private lateinit var preferences: SharedPreferences
+    private lateinit var brakeView: SeekBar
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        brakeView = findViewById(R.id.brake)
         preferences = getPreferences(MODE_PRIVATE)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
@@ -52,9 +54,9 @@ class MainActivity : AppCompatActivity() {
         if (event == null) return super.dispatchKeyEvent(event)
         if (event.keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (event.action == KeyEvent.ACTION_DOWN)
-                findViewById<SeekBar>(R.id.brake).progress = 100
+                brakeView.progress = 100
             else if (event.action == KeyEvent.ACTION_UP)
-                findViewById<SeekBar>(R.id.brake).progress = 0
+                brakeView.progress = 0
             return true
         }
         return super.dispatchKeyEvent(event)

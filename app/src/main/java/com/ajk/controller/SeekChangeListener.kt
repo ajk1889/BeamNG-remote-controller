@@ -37,7 +37,10 @@ class SeekChangeListener(
         val data = if (position == 'l')
             listOf(Event(ANALOG_LY, analogValues.y), Event(ANALOG_LX, analogValues.x))
         else listOf(Event(ANALOG_RY, analogValues.y), Event(ANALOG_RX, analogValues.x))
-        lastEventSentTimestamp = sendRequestConditionally(lastEventSentTimestamp, data)
+        lastEventSentTimestamp = if (!fromUser) {
+            connection.sendMessage(data)
+            now()
+        } else sendRequestConditionally(lastEventSentTimestamp, data)
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
