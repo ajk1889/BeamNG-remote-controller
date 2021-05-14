@@ -52,9 +52,9 @@ class MainActivity : AppCompatActivity() {
         if (event == null) return super.dispatchKeyEvent(event)
         if (event.keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (event.action == KeyEvent.ACTION_DOWN)
-                findViewById<SeekBar>(R.id.brake).progress = 100
+                connection?.sendMessage(listOf(Event(ANALOG_RX, right.x), Event(ANALOG_RY, Short.MAX_VALUE)))
             else if (event.action == KeyEvent.ACTION_UP)
-                findViewById<SeekBar>(R.id.brake).progress = 0
+                connection?.sendMessage(listOf(Event(ANALOG_RX, right.x), Event(ANALOG_RY, Short.MIN_VALUE)))
             return true
         }
         return super.dispatchKeyEvent(event)
