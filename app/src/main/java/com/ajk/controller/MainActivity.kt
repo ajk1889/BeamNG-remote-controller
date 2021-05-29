@@ -8,6 +8,8 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.KeyEvent
 import android.view.WindowManager
 import android.widget.CheckBox
@@ -23,6 +25,7 @@ import kotlin.math.asin
 import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
+    val handler = Handler(Looper.getMainLooper())
     private val left = AnalogValues(Short.MIN_VALUE, Short.MIN_VALUE)
     private val right = AnalogValues(Short.MIN_VALUE, Short.MIN_VALUE)
 

@@ -20,7 +20,9 @@ class Connection (uri: URI, private val activity: MainActivity) : WebSocketClien
     override fun onMessage(message: String?) {}
     override fun onClose(code: Int, reason: String?, remote: Boolean) {}
     override fun onError(ex: Exception?) {
-        Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show()
+        activity.handler.post {
+            Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onMessage(bytes: ByteBuffer?) {
