@@ -1,5 +1,6 @@
 package com.ajk.controller
 
+import android.widget.Toast
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.enums.ReadyState
 import org.java_websocket.handshake.ServerHandshake
@@ -8,7 +9,7 @@ import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Connection (uri: URI) : WebSocketClient(uri) {
+class Connection (uri: URI, private val activity: MainActivity) : WebSocketClient(uri) {
 
     override fun onOpen(handshakedata: ServerHandshake?) {
         if (readyState == ReadyState.OPEN) {
@@ -18,7 +19,9 @@ class Connection (uri: URI) : WebSocketClient(uri) {
     }
     override fun onMessage(message: String?) {}
     override fun onClose(code: Int, reason: String?, remote: Boolean) {}
-    override fun onError(ex: Exception?) {}
+    override fun onError(ex: Exception?) {
+        Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show()
+    }
 
     override fun onMessage(bytes: ByteBuffer?) {
         val jsonObject = JSONObject(bytes?.array()?.decodeToString() ?: "{}")

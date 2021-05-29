@@ -6,35 +6,25 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
-    <androidx.appcompat.widget.AppCompatSeekBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="40dp"
-        android:id="@+id/accelerator"
-        android:background="#955"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <TextView
+        <androidx.appcompat.widget.AppCompatSeekBar
             android:layout_width="0dp"
-            android:layout_height="90dp"
-            android:text="Down"
-            android:id="@+id/gearDown"
+            android:layout_height="wrap_content"
+            android:id="@+id/clutch"
+            android:padding="40dp"
+            android:layout_weight="1"
+            android:background="#559"/>
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="match_parent"
+            android:text="Misc"
+            android:id="@+id/misc"
             android:gravity="center"
             android:textColor="@color/white"
-            android:layout_weight="1"
-            android:background="#335"/>
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="90dp"
-            android:text="Up"
-            android:id="@+id/gearUp"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:layout_weight="1"
-            android:background="#353"/>
+            android:background="#553"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -57,16 +47,44 @@
             android:text="Handbrake"
             android:background="@color/cardview_dark_background" />
     </LinearLayout>
-    <androidx.appcompat.widget.AppCompatSeekBar
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/brake"
-        android:padding="40dp"
-        android:background="#595"/>
-    <androidx.appcompat.widget.AppCompatSeekBar
+        android:orientation="horizontal">
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/brake"
+            android:layout_weight="1"
+            android:padding="40dp"
+            android:background="#595"/>
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="match_parent"
+            android:text="Up"
+            android:id="@+id/gearUp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:background="#353"/>
+    </LinearLayout>
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/clutch"
-        android:padding="40dp"
-        android:background="#559"/>
+        android:orientation="horizontal">
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:padding="40dp"
+            android:layout_weight="1"
+            android:id="@+id/accelerator"
+            android:background="#955"/>
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="match_parent"
+            android:text="Down"
+            android:id="@+id/gearDown"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:background="#335"/>
+    </LinearLayout>
 </LinearLayout>

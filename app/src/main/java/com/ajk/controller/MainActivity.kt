@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun connect(url: String) {
-        val conn = Connection(URI(url))
+        val conn = Connection(URI(url), this)
         connection = conn
         conn.connect()
 
@@ -168,6 +168,14 @@ class MainActivity : AppCompatActivity() {
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), 20 * 1000)
+
+        findViewById<TextView>(R.id.misc).setOnTouchListener { _, event ->
+            when (event.action) {
+                KeyEvent.ACTION_DOWN -> conn.sendMessage(Event(CIRCLE, 1))
+                KeyEvent.ACTION_UP -> conn.sendMessage(Event(CIRCLE, 0))
+            }
+            return@setOnTouchListener true
+        }
 
         findViewById<TextView>(R.id.gearUp).setOnTouchListener { _, event ->
             when (event.action) {
