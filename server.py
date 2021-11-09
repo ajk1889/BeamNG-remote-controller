@@ -34,6 +34,7 @@ def send_command(code, value):
     elif code == 3:
         vjoy.set_axis(pyvjoy.HID_USAGE_RY, value//2 + 16384)
     else:
+        code -= 1
         vjoy.set_button(code, 1 if value else 0 )
 
 
